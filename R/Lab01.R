@@ -1,6 +1,9 @@
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(ggplot2,dplyr,patchwork)
+pacman::p_load(ggplot2,dplyr,patchwork,rnoaa)
 print("hello world version 2")
+
+system("git config --global user.email 'williamvl@vt.edu' ") 
+system("git config --global user.name 'William Le' ")
 
 data <- data.frame(
   day = as.Date("2019-01-01") + 0:99,
