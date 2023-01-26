@@ -66,6 +66,11 @@ p1 = ggplot(data, aes(x=day)) +
     ) +
     ggtitle("Low and High Temperatures (°C) Compared to Precipitation (mm)")
 
+filename=paste0(basestr,"graph01.pdf")
+pdf(filename)
+plot(p1)
+dev.off()
+
 #Homework 2:
 source("https://goo.gl/Cb8zGn")
 myflowgage_id="01645762"
@@ -82,15 +87,13 @@ WXData <- WXData %>%
 combined = inner_join(WXData, myflowgage$flowdata, by= "date")
 
 dataC <- data.frame(
-  day = as.Date("2016-01-01") + 0:2567,
+  day = as.Date("2016-01-01") + 0:2569,
   tmin = combined$tmin / 10,
   precipitation = combined$prcp/10
 )
 dataC$tmax = combined$tmax / 10
 dataC$flow = combined$flow
 
-library(ggplot2)
-library(gtable)
 p2 = ggplot(dataC, aes(x=day)) +
   geom_line( aes(y=tmin), linewidth=2, color=tminColor) + 
   geom_line( aes(y=tmax), linewidth=2, color=tmaxColor) + 
@@ -108,7 +111,6 @@ p2 = ggplot(dataC, aes(x=day)) +
     axis.title.y.right = element_text(color = precipColor, size=12)
   ) +
   ggtitle("Temp and Precip over Days")
-plot(p2)
 
 p3 = p2 + ggplot(dataC, aes(x=day)) +
   geom_line(aes(y=flow), linewidth=2, color= "Orange") + theme(
@@ -116,11 +118,12 @@ p3 = p2 + ggplot(dataC, aes(x=day)) +
     axis.title.y.right = element_text(color = precipColor, size=12) 
   ) + scale_y_continuous(name = "Flow (m^3/day)") + ggtitle("Flow vs Days")
 
-#filename=paste0(basestr,"graph01.pdf")
-pdf(filename) 
-plot(p1)
+filename2=paste0(basestr,"graph02.pdf")
+pdf(filename2)
 plot(p3)
 dev.off()
-print("file size")
+print("file size 1")
 print(file.size(filename))
+print("file size 2")
+print(file.size(filename2))
 print("I finished!")
