@@ -4,8 +4,8 @@ myhomedir=Sys.getenv("HOME")
 # Next depends on where you set up your git, and what you called it locally, 
 # but when you start a new git project, it will be the first directory you 
 # are placed in
-# getwd()
-# mygitdir=getwd() [This doesn't work... keeps setting it to data...]
+#getwd()
+#mygitdir=getwd() #[This doesn't work... keeps setting it to data...]
 mygitdir=setwd("/home/williamvl/2023Final/BSE5304Labs")
 # In the future you might want to search around for this
 # mygitdir=paste0(myhomedir,"/2023/BSE5304Lab02")
@@ -185,6 +185,8 @@ MinTempCol <- "#0000ff"
       filename=paste0(mypdfdir,basestr,"Lab02Fig01.pdf")
       pdf(filename) 
       plot(fel)
+      plot(bboxpts,add=T)
+      plot(pourpoint,add=T,col="red")
       dev.off()
       print("file size")
       print(file.size(filename))
@@ -194,6 +196,8 @@ MinTempCol <- "#0000ff"
       filename=paste0(mypdfdir,basestr,"Lab02Fig02.pdf")
       pdf(filename) 
       plot(fel-z)
+      plot(bboxpts,add=T)
+      plot(pourpoint,add=T,col="red")
       dev.off()
       print("file size")
       print(file.size(filename))
