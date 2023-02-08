@@ -11,7 +11,7 @@ mygitdir=setwd("/home/williamvl/2023Final/BSE5304Labs")
 # mygitdir=paste0(myhomedir,"/2023/BSE5304Lab02")
 # Mostly, we want to know where we are putting our homework PDFs
 mypdfdir=paste0(mygitdir,"/pdfs")
-
+ 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(ggplot2,dplyr,patchwork,rnoaa)
 pacman::p_load(operators,topmodel,DEoptim,soilDB,sp,curl,httr,
