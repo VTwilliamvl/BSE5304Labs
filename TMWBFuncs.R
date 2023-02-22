@@ -19,6 +19,9 @@ soil_wetting_above_capacity<-function(AWprev,dP_func,AWC_func){
   excess_func<-AWprev+dP_func-AWC_func
   c(AW_func,excess_func)
 }
+#
+#
+#
 
 TMWBmodel=function(TMWBdf,fcres=.3,FldCap=.45,WiltPt=.15,Z=1000,
                    SFTmp=2,bmlt6=4.5,bmlt12=0.0,Tmlt=3,Tlag=1){
@@ -30,7 +33,7 @@ TMWBmodel=function(TMWBdf,fcres=.3,FldCap=.45,WiltPt=.15,Z=1000,
   TMWBdf$Tsno=SNO_df$Tsno
   attach(TMWBdf)
   TMWBdf$PET=PET_fromTemp(Jday=(1+as.POSIXlt(date)$yday),Tmax_C = MaxTemp,Tmin_C = MinTemp,
-                          lat_radians = myflowgage$declat*pi/180) * 1000
+                        lat_radians = myflowgage$declat*pi/180) * 1000
   detach(TMWBdf)
   
   TMWBdf$ET = TMWBdf$PET # in mm/day
@@ -85,7 +88,7 @@ TMWBmodel=function(TMWBdf,fcres=.3,FldCap=.45,WiltPt=.15,Z=1000,
   TMWBdf$ET = 0 # Initializing ET
   TMWBdf$AW = 0 # Initializing AW
   TMWBdf$Excess = 0 # Initializing Excess
-  
+
   # Loop to calculate AW and Excess
   attach(TMWBdf)
   for (t in 2:length(AW)){
@@ -137,5 +140,4 @@ TMWBmodel=function(TMWBdf,fcres=.3,FldCap=.45,WiltPt=.15,Z=1000,
 NSE=function(Yobs,Ysim){
   return(1-sum((Yobs-Ysim)^2,na.rm=TRUE)/sum((Yobs-mean(Yobs, na.rm=TRUE))^2, na.rm=TRUE))
 }
-
 
