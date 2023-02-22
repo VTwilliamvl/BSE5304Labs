@@ -605,3 +605,14 @@ NSE=function(Yobs,Ysim){
   return(1-sum((Yobs-Ysim)^2,na.rm=TRUE)/sum((Yobs-mean(Yobs, na.rm=TRUE))^2, na.rm=TRUE))
 }
 
+# So we are going to visually "guestimate" that S should be somewhere between 
+# 45mm and 260mm… repeat plotting until your solution covers the 
+# largest Qmm vs dP event (upper right hand corner of plot). 
+# 
+
+# Assuming that (P-Ia) ~ dP, we can visually compare 
+attach(BasinTMWB_JO)
+plot(dP,Qmm)
+points(dP,dP^2/(dP+45),col="red")  # S guestimates in bold
+points(dP,dP^2/(dP+260),col="blue")# S guestimates in bold
+

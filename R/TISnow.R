@@ -1,3 +1,7 @@
+#
+# Lets make one out of our Temperature Index Snow Model
+#
+
 #SFTmp = 3  # referred to as SFTMP in SWAT input (Table 1)
 #bmlt6 = 4.5   # referred to as SMFMX in SWAT input (Table 1)
 #bmlt12 = 0.0  # referred to as SMFMN in SWAT input adjusted for season
