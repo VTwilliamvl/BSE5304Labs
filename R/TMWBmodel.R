@@ -1,7 +1,6 @@
 TMWBmodel = function(TMWBdf, fcres=.3,FldCap=.45,WiltPt=.15,Z=1000){
   
 # Our TMWB Model
-
 TMWBdf$ET = TMWBdf$PET # in mm/day
 TMWBdf$AWC=(0.45-0.15)*1000 #Fld Cap = .45, Wilt Pt = .15, z=1000mm
 TMWBdf$dP = TMWBdf$P-TMWBdf$ET -TMWBdf$SNO + TMWBdf$SNOmlt 
@@ -126,7 +125,7 @@ return(TMWBdf)
 
 #Make a plot that has Qmm, P,and Qpred over time
 plot(TMWBdf$date,TMWBdf$P,col="black")
-lines(TMWBdf$date,TMWBdf$Qmm,type = "l",col="black")
+lines(TMWBdf$date,TMWBdf$Qmm,type = "l",col="red")
 lines(TMWBdf$date,TMWBdf$Qpred,col="blue")
 plot(TMWBdf$Qmm,TMWBdf$Qpred)
 NSE=function(Yobs,Ysim){

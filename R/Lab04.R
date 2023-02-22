@@ -45,10 +45,9 @@ pacman::p_load(EcoHydRology)
 
 setwd(datadir)
 #
-# Should we do a gage that is easy, or deal with some reality?
+# Gage: COCKERMOUTH RIVER BELOW HARDY BROOK, AT GROTON, NH
 #
-myflowgage_id="0205551460"  # Old Friendly Gage
-myflowgage_id="14216500"    # Most Frustrating Gage... lets do it!
+myflowgage_id="01077400"    # Most Frustrating Gage... lets do it!
 myflowgage=get_usgs_gage(myflowgage_id,begin_date = "2015-01-01",
                          end_date = "2022-03-01")
 
@@ -243,7 +242,6 @@ ssa=raster("mydemssa.tif")
 plot(ssa) 
 
 # Threshold
-system("mpiexec -n 2 threshold -ssa mydemssa.tif -src mydemsrc1.tif -thresh 2000")
 syscmd=paste0("mpiexec -n 2 threshold -ssa mydemssa.tif -src mydemsrc1.tif -thresh ",subthreshold)
 system(syscmd)
 src1=raster("mydemsrc1.tif")
@@ -290,7 +288,7 @@ ssurgo.geom_utm=project(ssurgo.geom,crs_utm)
 plot(ssurgo.geom_utm,col=rainbow(length(ssurgo.geom_utm)))
 plot(mydemw_poly,add=T)
 ssurgo.geom_utm_crop=crop(ssurgo.geom_utm,mydemw_poly)
-
+zip("mydemw.zip",list.files(pattern="mydemw[:.:]"))
 plot(ssurgo.geom_utm_crop,col=rainbow(length(ssurgo.geom_utm)))
 plot(mydemw_poly,add=T)
 #
@@ -370,16 +368,18 @@ plot(TIC_terra)
 # 
 
 TMWB=BasinData
+
 #
 # Our model will
 # 1) Calculate PET for the basin via Function
 # 2) Calculate the Snow Accumulation and Melt via Function
 # 3) Run TMWB via Function 
 
+source("https://raw.githubusercontent.com/VTwilliamvl/BSE5304Labs/main/R/TMWBFuncs.R")
 source("https://raw.githubusercontent.com/VTwilliamvl/BSE5304Labs/main/R/TISnow.R")
 
 attach(TMWB)
-SNO_df=TISnow(TMWB)
+SNO_df=TISnow(TMWB, SFTmp = 2, bmlt6 = 3, bmlt12 = 0, Tmlt = 3, Tlag = 1)
 TMWB$SNO=SNO_df$SNO
 TMWB$SNOmlt=SNO_df$SNOmlt
 TMWB$SNOfall=SNO_df$SNOfall
@@ -396,10 +396,10 @@ plot(TMWB$date,TMWB$PET)
 detach(TMWB)
 
 attach(TMWB)
-junkout = TMWBmodel(TMWB)
+TMWBnew = TMWBmodel(TMWB)
 detach(TMWB)
 
-NSE(TMWB$Qmm, TMWB$Qpred)
+NSE(TMWBnew$Qmm, TMWBnew$Qpred)
 #
 # Functionalizing big big big time
 # Here is a great place to make this into a function!
@@ -410,13 +410,144 @@ NSE(TMWB$Qmm, TMWB$Qpred)
 # largest Qmm vs dP event (upper right hand corner of plot). 
 # 
 
+# Assuming that (P-Ia) ~ dP, we can visually compare
+BasinTMWB_JO=TMWBnew[(month(TMWBnew$date) > 5 
+                      & month(TMWBnew$date) < 11),]
+attach(BasinTMWB_JO)
+plot(dP,Qmm)
+points(dP,dP^2/(dP+45),col="red")  # S guestimates in bold
+points(dP,dP^2/(dP+260),col="blue")# S guestimates in bold
+detach(BasinTMWB_JO)
+
+# We are going to visually "guestimate" that S should be somewhere between 
+# 45mm and 260mm… repeat plotting until your solution covers the 
+# largest Qmm vs dP event (upper right hand corner of plot). 
+
 # Assuming that (P-Ia) ~ dP, we can visually compare 
 attach(BasinTMWB_JO)
 plot(dP,Qmm)
 points(dP,dP^2/(dP+45),col="red")  # S guestimates in bold
 points(dP,dP^2/(dP+260),col="blue")# S guestimates in bold
+detach(BasinTMWB_JO)
 
-download.file(url,"Lab03_HW_Solution.R")
+# Now perform a “Calibration” using our method from Lab3 and the NSE
+# as the “Objective Function”.  
+#
+# Vary S to maximize NSE using Eq. 4 of Lyon 2004 as our predictor of Q
+#   Qpred=dP^2/(dP+S)
+#
+NSE(Qmm,dP^2/(dP+260))
+# [1] 0.02375528
+NSE(Qmm,dP^2/(dP+45))
+# [1] -0.5212436
+#
+# Keep iterating until NSE is as high as you can get for your 
+# best estimate to S (Sest)
+#
+f <- function (x) {
+  Sest=x
+  NSE(Qmm,dP^2/(dP+Sest))
+}
+optimize(f, c(50,500), tol = 0.0001,maximum = TRUE)$maximum
+Sest=87.10524
+plot(dP,Qmm)
+points(dP,dP^2/(dP+Sest),col="red") 
+########
+detach(BasinTMWB_JO)
+
+# 
+#CNModel
+#
+CNmodeldf = BasinData
+CNavg = 75
+IaFrac = 0.05
+fnc_slope=0 
+fnc_aspect=0
+func_DAWC=.3
+func_z=1000
+fnc_fcres=.3
+
+# Energy Balance based Snow Accumulation 
+# and Melt model from the EcoHydRology package.
+attach(CNmodeldf)
+SNO_Energy=SnowMelt(date, P, MaxTemp-3, MinTemp-3, myflowgage$declat, 
+                    slope = fnc_slope, aspect = fnc_aspect, tempHt = 1, 
+                    windHt = 2, groundAlbedo = 0.25,SurfEmissiv = 0.95, windSp = 2, 
+                    forest = 0, startingSnowDepth_m = 0,startingSnowDensity_kg_m3=450)
+# We will update the -3 in the above to be a lapse rate adjustment
+detach(CNmodeldf)
+CNmodeldf$SNO=SNO_Energy$SnowWaterEq_mm
+CNmodeldf$SNOmlt=SNO_Energy$SnowMelt_mm
+CNmodeldf$SnowfallWatEq_mm=SNO_Energy$SnowfallWatEq_mm
+CNmodeldf$SnowMelt_mm=SNO_Energy$SnowMelt_mm
+attach(CNmodeldf)
+CNmodeldf$Albedo=.23
+CNmodeldf$Albedo[CNmodeldf$SNO>0]=.95
+PET=PET_fromTemp(Jday=(1+as.POSIXlt(date)$yday),
+                 Tmax_C = MaxTemp,Tmin_C = MinTemp,
+                 lat_radians = myflowgage$declat*pi/180) * 1000
+CNmodeldf$PET=PET
+detach(CNmodeldf)
+rm(list="PET")
+
+CNmodeldf$AWC=func_DAWC*func_z
+# Oh, this we want to vary some of these around our watershed!
+CNmodeldf$dP = 0 # Initializing Net Precipitation
+CNmodeldf$ET = 0 # Initializing ET
+CNmodeldf$AW = 0 # Initializing AW
+CNmodeldf$Excess = 0 # Initializing Excess
+CNmodeldf$S =0 # Initializing S
+CNmodeldf$Qpred=0 # Initializing Qpred
+attach(CNmodeldf)
+SSCNavg=(1000/CNavg-10)*25.4
+SSCN=SoilStorage(S_avg=SSCNavg, field_capacity=func_DAWC*.9,
+                 soil_water_content=0.1*func_DAWC, porosity=func_DAWC)
+Ia_init=IaFrac*SSCN   
+CNmodeldf$CNavg = CNavg
+CNmodeldf$SSCNavg = SSCNavg
+CNmodeldf$SSCN = SSCN
+detach(CNmodeldf)
+rm(list=c("CNavg", "SSCN", "SSCNavg"))
+CNmodeldf$Ia = Ia_init
+attach(CNmodeldf)
+# Those processes that are dependant on prior days conditions, we run as a 
+# loop through each of the days.
+for (t in 2:length(AW)){
+  ET[t] = AW[t-1]/AWC[t-1]*PET[t]
+  # Calculating Net Precipitation which adds in slope above's Excess
+  dP[t] = SNO_Energy$Rain_mm[t] - ET[t] + 
+    SNO_Energy$SnowMelt_mm[t]    # CN Solution
+  # Is the soil saturated, and thus can't take more dP? 
+  if (AW[t-1] + dP[t]>=AWC[t]){
+    Excess[t]=AW[t-1] + dP[t] -AWC[t]
+    AW[t]=AWC[t]
+    # Otherwise, if dP is less than the initial abstraction? 
+    # https://en.wikipedia.org/wiki/Runoff_curve_number#Definition
+  } else if (dP[t]<=Ia[t]) {
+    Excess[t]=0.0
+    AW[t]=AW[t-1] + dP[t]
+  } else {
+    Excess[t]=(dP[t]-Ia[t])^2/(dP[t]-Ia[t]+SSCN[t])
+    AW[t]=AW[t-1] + dP[t] -Excess[t]
+  }
+  S[t]=S[t-1]+Excess[t]
+  Qpred[t]=fnc_fcres*S[t]
+  S[t]=S[t]-Qpred[t]
+}
+CNmodeldf$ET=ET
+CNmodeldf$dP=dP
+CNmodeldf$AW=AW
+CNmodeldf$Excess=Excess
+CNmodeldf$S=S
+CNmodeldf$Qpred=Qpred # UPDATE vector BEFORE DETACHING
+rm(list=c("AW", "dP", "ET", "Excess", "Qpred", "S"))
+detach(CNmodeldf)
+
+NSeff(CNmodeldf$Qpred,CNmodeldf$Qmm)
+plot(CNmodeldf$Qpred)
+plot(CNmodeldf$Qmm)
+mean(CNmodeldf$Qmm)
+mean(CNmodeldf$Qpred)
 
 
 
