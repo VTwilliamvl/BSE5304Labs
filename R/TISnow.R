@@ -1,7 +1,3 @@
-#
-# Lets make one out of our Temperature Index Snow Model
-#
-
 #SFTmp = 3  # referred to as SFTMP in SWAT input (Table 1)
 #bmlt6 = 4.5   # referred to as SMFMX in SWAT input (Table 1)
 #bmlt12 = 0.0  # referred to as SMFMN in SWAT input adjusted for season
@@ -38,7 +34,6 @@ TISnow=function(WBData,SFTmp=2,bmlt6=4.5,bmlt12=0.0,Tmlt=3,Tlag=1){
       SNOmlt[t]= min(SNOmlt[t],SNO[t-1])
       SNO[t]= SNO[t-1] -SNOmlt[t]
     }
-    print(t)
   }
   plot(date,SNO,type="l")
   detach(WBData)
@@ -49,4 +44,3 @@ TISnow=function(WBData,SFTmp=2,bmlt6=4.5,bmlt12=0.0,Tmlt=3,Tlag=1){
   rm(list=c("SNO", "SNOmlt", "Tsno","SNOfall"))
   return(data.frame(Tsno=WBData$Tsno,SNO=WBData$SNO,SNOmlt=WBData$SNOmlt,SNOfall=WBData$SNOfall))
 }
-

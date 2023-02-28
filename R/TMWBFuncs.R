@@ -19,6 +19,9 @@ soil_wetting_above_capacity<-function(AWprev,dP_func,AWC_func){
   excess_func<-AWprev+dP_func-AWC_func
   c(AW_func,excess_func)
 }
+#
+#
+#
 
 TMWBmodel=function(TMWBdf,fcres=.3,FldCap=.45,WiltPt=.15,Z=1000,
                    SFTmp=2,bmlt6=4.5,bmlt12=0.0,Tmlt=3,Tlag=1){

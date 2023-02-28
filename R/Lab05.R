@@ -7,7 +7,7 @@ rm(list=objects()) # Removes ALL the objects… so be careful here.
 #
 # What is going to change from use case to use case 
 LabNo="/Lab04a"
-myflowgage_id="0205551460"  # Old Friendly Gage
+myflowgage_id="01077400"  # Old Friendly Gage: 0205551460 
 #
 # What needs to be loaded
 #
@@ -81,10 +81,15 @@ WXData=FillMissWX(declat=myflowgage$declat, declon=myflowgage$declon,
 BasinData=merge(WXData,myflowgage$flowdata,by.x="date",by.y="mdate")
 TMWB=BasinData
 
+url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TMWBFuncs.R"
+# This will grab the solution for last weeks Lab03 Homework
+download.file(url,"TMWBFuncs.R")
+file.edit("TMWBFuncs.R")
+source(url)
+
 url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TISnow.R"
 # This will grab the solution for last weeks Lab03 Homework
 source(url)
-
 
 outTMWB = TMWBmodel(TMWBdf = TMWB)
 NSE(outTMWB$Qmm, outTMWB$Qpred)
@@ -99,12 +104,21 @@ TMWBoptFunc <- function(x){
   
 }
 #If it does not work, remember to detach! detach(WBData) OR detach(TMWBdf)
-x=c(0.2,2000)
+#x=c(0.2,2000)
 #TMWBoptFunc(x)
 lower <- c(.01,300, 1, .1)
 upper <- c(.95,3000, 6, 5)
 outDEoptm = DEoptim(TMWBoptFunc, lower, upper, 
                     DEoptim.control(NP=80,itermax = 10, F= 1.2, CR = 0.7))
+
+CNoptFunc <- function(x){
+  x1 <- x[1]
+  x2 <- x[2]
+  x3 <- x[3]
+  x4 <- x[4]
+  outCN=CNmodel(TMWBdf = TMWB, fcres = x1, Z = x2, SFTmp = x3, bmlt6 = x4)
+  return (1-NSE(outTMWB$Qmm, outTMWB$Qpred))
+}
 
 setwd("~/src/")
 install.packages(c("ecohydrology/pkg/SWATmodel/"),repos = NULL)
