@@ -1,14 +1,9 @@
 # 
 #CNModel
 #
-CNmodeldf = BasinData
-CNavg = 75
-IaFrac = 0.05
-fnc_slope=0 
-fnc_aspect=0
-func_DAWC=.3
-func_z=1000
-fnc_fcres=.3
+
+CNmodel=function(CNmodeldf,CNavg = 75,IaFrac = 0.05,fnc_slope=0,fnc_aspect=0,
+                 func_DAWC=.3,func_z=1000,fnc_fcres=.3) {
 
 # Energy Balance based Snow Accumulation 
 # and Melt model from the EcoHydRology package.
@@ -91,3 +86,5 @@ plot(CNmodeldf$Qpred)
 plot(CNmodeldf$Qmm)
 mean(CNmodeldf$Qmm)
 mean(CNmodeldf$Qpred)
+
+}
