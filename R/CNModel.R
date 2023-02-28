@@ -87,4 +87,8 @@ plot(CNmodeldf$Qmm)
 mean(CNmodeldf$Qmm)
 mean(CNmodeldf$Qpred)
 
+return(CNmodeldf)
+
 }
+
+
