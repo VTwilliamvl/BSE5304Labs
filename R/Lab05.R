@@ -81,15 +81,20 @@ WXData=FillMissWX(declat=myflowgage$declat, declon=myflowgage$declon,
 BasinData=merge(WXData,myflowgage$flowdata,by.x="date",by.y="mdate")
 TMWB=BasinData
 
-url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TMWBFuncs.R"
-# This will grab the solution for last weeks Lab03 Homework
-download.file(url,"TMWBFuncs.R")
-file.edit("TMWBFuncs.R")
-source(url)
+# url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TMWBFuncs.R"
+# # This will grab the solution for last weeks Lab03 Homework
+# download.file(url,"TMWBFuncs.R")
+# file.edit("TMWBFuncs.R")
+# source(url)
+source("https://raw.githubusercontent.com/VTwilliamvl/BSE5304Labs/main/R/TMWBFuncs.R")
 
-url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TISnow.R"
-# This will grab the solution for last weeks Lab03 Homework
-source(url)
+# url="https://raw.githubusercontent.com/vtdrfuka/BSE5304Labs/main/R/TISnow.R"
+# # This will grab the solution for last weeks Lab03 Homework
+# source(url)
+source("https://raw.githubusercontent.com/VTwilliamvl/BSE5304Labs/main/R/TISnow.R")
+
+#CN Model
+source("https://raw.githubusercontent.com/VTwilliamvl/BSE5304Labs/main/R/CNModel.R")
 
 outTMWB = TMWBmodel(TMWBdf = TMWB)
 NSE(outTMWB$Qmm, outTMWB$Qpred)
@@ -104,8 +109,6 @@ TMWBoptFunc <- function(x){
   
 }
 #If it does not work, remember to detach! detach(WBData) OR detach(TMWBdf)
-#x=c(0.2,2000)
-#TMWBoptFunc(x)
 lower <- c(.01,300, 1, .1)
 upper <- c(.95,3000, 6, 5)
 outDEoptm = DEoptim(TMWBoptFunc, lower, upper, 
@@ -114,11 +117,13 @@ outDEoptm = DEoptim(TMWBoptFunc, lower, upper,
 CNoptFunc <- function(x){
   x1 <- x[1]
   x2 <- x[2]
-  x3 <- x[3]
-  x4 <- x[4]
-  outCN=CNmodel(TMWBdf = TMWB, fcres = x1, Z = x2, SFTmp = x3, bmlt6 = x4)
-  return (1-NSE(outTMWB$Qmm, outTMWB$Qpred))
+  outCN=CNmodel(CNmodeldf = TMWB, CNavg = x1, IaFrac = x2)
+  return (1-NSE(outCN$Qmm, outCN$Qpred))
 }
+lower <- c(35,.01)
+upper <- c(99,.25)
+outCEoptm = DEoptim(CNoptFunc, lower, upper, 
+                    DEoptim.control(NP=80,itermax = 10, F= 1.2, CR = 0.7))
 
 setwd("~/src/")
 install.packages(c("ecohydrology/pkg/SWATmodel/"),repos = NULL)
