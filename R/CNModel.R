@@ -81,11 +81,11 @@ CNmodeldf$Qpred=Qpred # UPDATE vector BEFORE DETACHING
 rm(list=c("AW", "dP", "ET", "Excess", "Qpred", "S"))
 detach(CNmodeldf)
 
-NSeff(CNmodeldf$Qpred,CNmodeldf$Qmm)
-plot(CNmodeldf$Qpred)
-plot(CNmodeldf$Qmm)
-mean(CNmodeldf$Qmm)
-mean(CNmodeldf$Qpred)
+# NSeff(CNmodeldf$Qpred,CNmodeldf$Qmm)
+# plot(CNmodeldf$Qpred)
+# plot(CNmodeldf$Qmm)
+# mean(CNmodeldf$Qmm)
+# mean(CNmodeldf$Qpred)
 
 return(CNmodeldf)
 
