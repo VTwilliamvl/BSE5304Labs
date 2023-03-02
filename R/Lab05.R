@@ -104,6 +104,11 @@ TMWBoptFunc <- function(x){
   x2 <- x[2]
   x3 <- x[3]
   x4 <- x[4]
+  x5 <- x[5]
+  x6 <- x[6]
+  x7 <- x[7]
+  x8 <- x[8]
+  x9 <- x[9]
   outTMWB=TMWBmodel(TMWBdf = TMWB, fcres = x1, Z = x2, SFTmp = x3, bmlt6 = x4)
   return (1-NSE(outTMWB$Qmm, outTMWB$Qpred))
   
@@ -117,11 +122,17 @@ outDEoptm = DEoptim(TMWBoptFunc, lower, upper,
 CNoptFunc <- function(x){
   x1 <- x[1]
   x2 <- x[2]
-  outCN=CNmodel(CNmodeldf = TMWB, CNavg = x1, IaFrac = x2)
+  x3 <- x[3]
+  x4 <- x[4]
+  x5 <- x[5]
+  x6 <- x[6]
+  x7 <- x[7]
+  outCN=CNmodel(CNmodeldf = TMWB, CNavg = x1, IaFrac = x2, fnc_slope=x3,fnc_aspect=x4,
+                func_DAWC=x5,func_z=x6,fnc_fcres=x7)
   return (1-NSE(outCN$Qmm, outCN$Qpred))
 }
-lower <- c(35,.01)
-upper <- c(99,.25)
+lower <- c(30,.01, 0, 0, 0.1, 300, 0.25)
+upper <- c(90,.25, 0.1, 0.2, 0.3, 3000, 0.5)
 outCEoptm = DEoptim(CNoptFunc, lower, upper, 
                     DEoptim.control(NP=80,itermax = 10, F= 1.2, CR = 0.7))
 
