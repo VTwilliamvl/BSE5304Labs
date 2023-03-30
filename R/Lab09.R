@@ -100,6 +100,9 @@ USGS02055100=make_usgs_gage_list(siteNo ="02055100" )
 USGS02055000=make_usgs_gage_list(siteNo ="02055000" )
 USGS02054530=make_usgs_gage_list(siteNo ="02054530" )
 
+#Creates a subset of data for 0205551460 gage that removes cms values below 0.5
+USGS020551460new = subset(USGS0205551460$flowdata, USGS0205551460$flowdata$cms > 0.5)
+
 ab_ll=rbind(USGS02056000$site,
               USGS0205551460$site,
               USGS02055100$site,
