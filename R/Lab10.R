@@ -625,6 +625,7 @@ TIC02=TMWB
 TIC03=TMWB
 TIC04=TMWB
 TIC05=TMWB
+TI_Total = TMWB
 # For TIC01 CNavg=VSAParams$CN[1] but confirm
 TIC01 = CNmodel(CNmodeldf = TIC01, CNavg=VSAParams$CN[1], 
                   declat=myflowgage$declat,declon=myflowgage$declon)
@@ -660,9 +661,12 @@ TIC05 = CNmodel(CNmodeldf = TIC01, CNavg=VSAParams$CN[5],
 TIC05$qpeak=TIC05$Qpred/3600/24/1000*myflowgage$area/nTIclass*10^6 #m^3/sec
 TIC05$sed=(TIC05$Qpred*TIC01$qpeak*myflowgage$area/nTIclass*100)^.56*MUSLE$KCPLSCFRG118[5]    # Eq. 4:1.1.1 SWAT Theory
 
-plot(TIC01$date,TIC01$sed, xlab = "TIC01", ylab = "Sediment Loss")
-plot(TIC02$date,TIC02$sed)
-plot(TIC03$date,TIC03$sed)
-plot(TIC04$date,TIC04$sed)
-plot(TIC05$date,TIC05$sed)
+TI_Total$sed = TIC01$sed + TIC02$sed + TIC03$sed + TIC04$sed + TIC05$sed
+  
+plot(TIC01$date,TIC01$sed, type = "l")
+plot(TIC02$date,TIC02$sed, type = "l")
+plot(TIC03$date,TIC03$sed, type = "l")
+plot(TIC04$date,TIC04$sed, type = "l")
+plot(TIC05$date,TIC05$sed, type = "l")
+plot(TI_Total$date,TI_Total$sed, type = "l")
                                                                                                     
